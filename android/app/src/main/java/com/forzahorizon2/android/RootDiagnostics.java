@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * crash files are left out. Each command has a time and size limit; one that fails is noted and the rest go on.
  */
 final class RootDiagnostics {
-    private static final String PACKAGE = "com.forzahorizon2.android";
+    private static final String PACKAGE = BuildConfig.APPLICATION_ID;  // ends in ".dev" in the DEV build
 
     // GPU load, clock and limits, one path per line (no brace expansion: it is not in every Android shell).
     private static final String[] GPU_SENSOR_FILES = {

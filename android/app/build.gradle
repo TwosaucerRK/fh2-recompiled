@@ -71,6 +71,10 @@ android {
 
     buildTypes {
         release {
+            // DEV build: installs next to the official app (package com.forzahorizon2.android.dev, its own data
+            // folder and saves). The Java package, JNI names and the provider authority (${applicationId}.reports)
+            // do not depend on it.
+            applicationIdSuffix '.dev'
             minifyEnabled false
             signingConfig releaseKeyFile.exists() ? signingConfigs.release : signingConfigs.debug
             // AGP builds release natives as RelWithDebInfo (-O2 -g); the game wants the SDK's Release

@@ -73,7 +73,9 @@ public final class MainActivity extends AppCompatActivity {
     private static final int REQUEST_ISO = 47;
     private static final String TREE_URI = "tree_uri";
     // Relative to the internal storage root (the "jogos" folder holds the user's games).
-    static final String GAME_FOLDER_NAME = "jogos/ForzaHorizon2";
+    // DEV build: its own game folder (with its own fh2_shaders.nfsp and "-saves" backups), so a modded bin.zip
+    // never touches the one the official app plays. The official build uses "jogos/ForzaHorizon2".
+    static final String GAME_FOLDER_NAME = "jogos/ForzaHorizon2DEV";
     static final String PROJECT_URL = "https://github.com/Gabrick75/fh2-recompiled";
 
     private TextView importStatus;
