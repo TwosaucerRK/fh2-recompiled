@@ -537,6 +537,9 @@ final class GameOptions {
         args.add("--audio_ganancia_pct=" + get(context, VOLUME));
         // Repeated messages (kernel stubs, resolved textures): the first 20 of each unless the player asks for all.
         args.add("--log_detalhado=" + flag(context, VERBOSE_LOG));
+        // With the verbose log on, every read of bin.zip is also written as a "[carga]" line (xboxkrnl_io.cpp), so
+        // tools/mapear_cargas.py can list which tiles and files the game streamed. Off with the verbose log off.
+        if (flag(context, VERBOSE_LOG)) args.add("--fh2_io_cargas=bin.zip");
         args.add("--audio_xma_en_trabajador=" + (flag(context, AUDIO_WORKER) ? 1 : 2));
         // Phone vibration (android_vibration.cpp): read once at start, never through the JVM per frame.
         args.add("--fh2_android_vibracao=" + flag(context, VIBRATION_PHONE));

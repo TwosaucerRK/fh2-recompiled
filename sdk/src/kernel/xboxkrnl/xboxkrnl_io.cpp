@@ -56,6 +56,16 @@ REXCVAR_DEFINE_INT32(nfsmw_io_aviso_ms, 8, "Filesystem",
 REXCVAR_DEFINE_INT32(nfsmw_io_resumen_s, 15, "Filesystem",
                      "Cada cuantos segundos se escribe el resumen [io] (0 = nunca).");
 
+// fh2: map what the open world streams. Every read of a file whose path contains this text (for example
+// "bin.zip") is written to the log as one "[carga]" line: milliseconds since the first such read, bytes and byte
+// offset. Each offset falls inside one entry of the zip's central directory, so tools/mapear_cargas.py turns the
+// lines into file names (N.fiz tiles, .pgeo, .pvsz) in the order the game asked for them. Empty = off.
+REXCVAR_DEFINE_STRING(fh2_io_cargas, "", "FH2",
+                      "Debug: log every read of files whose path contains this text (e.g. bin.zip) as [carga] "
+                      "lines with time, bytes and offset (empty = off).");
+REXCVAR_DEFINE_INT32(fh2_io_cargas_max, 400000, "FH2",
+                     "Debug: most [carga] lines written in a session (see fh2_io_cargas).");
+
 namespace rex::kernel::xboxkrnl {
 using namespace rex::system;
 
@@ -363,6 +373,20 @@ inline void AnotarLectura(uint64_t us, uint32_t bytes, const std::string_view ru
     // The offset is included. Without it a sequential sweep cannot be told apart from a reread.
     REXKRNL_WARN("[io] LENTO: leer {} bytes de '{}' en {} tardo {:.1f} ms{}", bytes, ruta,
                  desplazamiento, us / 1000.0, releida ? " (RELEIDA)" : "");
+  }
+
+  // fh2_io_cargas: one line per read of the watched files, with no time limit (the LENTO line above only
+  // shows the slow ones and stops at 300).
+  const std::string& filtro_cargas = REXCVAR_GET(fh2_io_cargas);
+  if (!filtro_cargas.empty() && ruta.find(filtro_cargas) != std::string_view::npos) {
+    static std::atomic<uint64_t> g_cargas{0};
+    static const uint64_t g_cargas_inicio_us = AhoraUs();
+    const uint64_t numero = g_cargas.fetch_add(1, std::memory_order_relaxed);
+    const int32_t maximo = REXCVAR_GET(fh2_io_cargas_max);
+    if (maximo > 0 && numero < static_cast<uint64_t>(maximo)) {
+      REXKRNL_INFO("[carga] t={} ms bytes={} offset={} ruta='{}'", (AhoraUs() - g_cargas_inicio_us) / 1000,
+                   bytes, desplazamiento, ruta);
+    }
   }
 }
 
